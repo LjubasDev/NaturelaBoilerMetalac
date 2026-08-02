@@ -13,7 +13,6 @@ MODES = {
 }
 
 
-
 async def async_setup_entry(
     hass,
     entry,
@@ -24,18 +23,18 @@ async def async_setup_entry(
 
     async_add_entities(
         [
-            BoilerModeSelect(
-                coordinator
-            )
+            BoilerModeSelect(coordinator)
         ]
     )
-
 
 
 class BoilerModeSelect(
     CoordinatorEntity,
     SelectEntity
 ):
+
+    _attr_has_entity_name = True
+
 
     def __init__(
         self,
@@ -48,8 +47,10 @@ class BoilerModeSelect(
 
         self.coordinator = coordinator
 
-        self._attr_name = (
-            "Boiler Mode"
+        self._attr_name = "Mode"
+
+        self._attr_unique_id = (
+            "naturela_smartboiler_mode"
         )
 
         self._attr_options = list(
@@ -57,14 +58,16 @@ class BoilerModeSelect(
         )
 
 
-
     @property
     def current_option(self):
 
+        state = self.coordinator.data.get(
+            "State"
+        )
+
         return MODES.get(
-            self.coordinator.data.get(
-                "State"
-            )
+            state,
+            "Unknown"
         )
 
 
@@ -73,13 +76,23 @@ class BoilerModeSelect(
         option
     ):
 
-        state = list(MODES.keys())[
-            list(MODES.values()).index(option)
-        ]
+        reverse_modes = {
+            value: key
+            for key, value in MODES.items()
+        }
+
+        state = reverse_modes.get(
+            option
+        )
+
+
+        if state is None:
+            return
 
 
         await self.coordinator.api.set_state(
-            state=state
+            state
         )
+
 
         await self.coordinator.async_request_refresh()

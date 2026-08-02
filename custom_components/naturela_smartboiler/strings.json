@@ -1,0 +1,15 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Naturela Smart Boiler",
+        "description": "Enter your Naturela cloud account and device ID",
+        "data": {
+          "email": "Email",
+          "password": "Password",
+          "device_id": "Device ID"
+        }
+      }
+    }
+  }
+}

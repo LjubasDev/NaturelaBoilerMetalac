@@ -34,8 +34,7 @@ class NaturelaWaterHeater(
     _attr_has_entity_name = True
 
     _attr_supported_features = (
-        WaterHeaterEntityFeature
-        .TARGET_TEMPERATURE
+        WaterHeaterEntityFeature.TARGET_TEMPERATURE
     )
 
     _attr_temperature_unit = (
@@ -49,9 +48,7 @@ class NaturelaWaterHeater(
 
         self.coordinator = coordinator
 
-        self._attr_name = (
-            "Smart Boiler"
-        )
+        self._attr_name = "Smart Boiler"
 
         self._attr_unique_id = (
             "naturela_smartboiler_main"
@@ -83,9 +80,14 @@ class NaturelaWaterHeater(
             "temperature"
         )
 
-        await self.coordinator.api.set_state(
-            temperature=temperature
+        if temperature is None:
+            return
+
+
+        await self.coordinator.api.set_temperature(
+            temperature
         )
+
 
         await self.coordinator.async_request_refresh()
 

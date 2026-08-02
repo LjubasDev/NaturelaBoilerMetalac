@@ -20,9 +20,8 @@ HEADERS = {
         "AppleWebKit/537.36 Chrome/150 Safari/537.36"
     ),
     "Accept": "*/*",
-    "Content-Type": "application/json",
     "X-Requested-With": "XMLHttpRequest",
-    "Referer": "https://iot.naturela-bg.com/",
+    "Referer": "https://iot.naturela-bg.com/Account/Login",
 }
 
 
@@ -100,18 +99,21 @@ class NaturelaAPI:
 
             "Password": self.password,
 
-            "rememberMe": "true",
+            "rememberMe": "on",
 
             "__RequestVerificationToken": csrf
         }
 
 
 
-        async with self.session.post(
-            LOGIN_URL,
-            data=payload,
-            allow_redirects=False
-        ) as response:
+            async with self.session.post(
+                LOGIN_URL,
+                data=payload,
+                headers={
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                allow_redirects=False
+            ) as response:
 
 
             _LOGGER.warning(

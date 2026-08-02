@@ -2,13 +2,13 @@
   "domain": "naturela_smartboiler",
   "name": "Naturela Smart Boiler",
   "version": "1.0.0",
-  "documentation": "https://github.com/",
+  "documentation": "https://github.com/ljubasdev/naturelasmartboiler-metalac",
+  "issue_tracker": "https://github.com/ljubasdev/naturelasmartboiler-metalac/issues",
+  "codeowners": [
+    "@ljubasdev"
+  ],
   "requirements": [
     "beautifulsoup4>=4.12.0"
-  ],
-  "dependencies": [],
-  "codeowners": [
-    "@local"
   ],
   "config_flow": true,
   "iot_class": "cloud_polling"

@@ -115,7 +115,7 @@ class NaturelaAPI:
         ) as response:
 
 
-            _LOGGER.debug(
+            _LOGGER.warning(
                 "Login response: %s",
                 response.status
             )
@@ -179,13 +179,13 @@ class NaturelaAPI:
             text = await response.text()
 
 
-            _LOGGER.debug(
+            _LOGGER.warning(
                 "Naturela response type: %s",
                 content_type
             )
 
 
-            _LOGGER.debug(
+            _LOGGER.warning(
                 "Naturela response body: %s",
                 text
             )

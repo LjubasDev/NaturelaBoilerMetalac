@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 
 from homeassistant.helpers.update_coordinator import (
@@ -7,6 +8,9 @@ from homeassistant.helpers.update_coordinator import (
 from homeassistant.core import HomeAssistant
 
 from .const import DEFAULT_SCAN_INTERVAL
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class NaturelaCoordinator(
@@ -23,28 +27,9 @@ class NaturelaCoordinator(
 
         super().__init__(
             hass,
-            logger=None,
+            logger=_LOGGER,
             name="Naturela Smart Boiler",
             update_interval=timedelta(
                 seconds=DEFAULT_SCAN_INTERVAL
             ),
         )
-
-
-    async def _async_update_data(self):
-
-        result = await self.api.get_status()
-
-        # API returns:
-        # {
-        # "objectJson":"{...}"
-        # }
-
-        import json
-
-        if "objectJson" in result:
-            return json.loads(
-                result["objectJson"]
-            )
-
-        return result

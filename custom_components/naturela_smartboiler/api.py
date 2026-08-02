@@ -21,7 +21,7 @@ HEADERS = {
     ),
     "Accept": "*/*",
     "X-Requested-With": "XMLHttpRequest",
-    "Referer": "https://iot.naturela-bg.com/Account/Login",
+    "Referer": "https://iot.naturela-bg.com/",
 }
 
 
@@ -58,6 +58,7 @@ class NaturelaAPI:
         )
 
 
+        # Get login page and extract CSRF token
         async with self.session.get(
             LOGIN_URL
         ) as response:
@@ -65,32 +66,30 @@ class NaturelaAPI:
             html = await response.text()
 
 
-            soup = BeautifulSoup(
-                html,
-                "html.parser"
+        soup = BeautifulSoup(
+            html,
+            "html.parser"
+        )
+
+
+        token = soup.find(
+            "input",
+            {
+                "name": "__RequestVerificationToken"
+            }
+        )
+
+
+        if not token:
+
+            raise Exception(
+                "Naturela CSRF token not found"
             )
 
 
-            token = soup.find(
-                "input",
-                {
-                    "name":
-                    "__RequestVerificationToken"
-                }
-            )
-
-
-            if not token:
-
-                raise Exception(
-                    "Naturela CSRF token not found"
-                )
-
-
-            csrf = token.get(
-                "value"
-            )
-
+        csrf = token.get(
+            "value"
+        )
 
 
         payload = {
@@ -99,21 +98,34 @@ class NaturelaAPI:
 
             "Password": self.password,
 
-            "rememberMe": "on",
+            "rememberMe": "true",
 
             "__RequestVerificationToken": csrf
         }
 
 
+        _LOGGER.warning(
+            "Trying login with email: %s",
+            self.email
+        )
 
-            async with self.session.post(
-                LOGIN_URL,
-                data=payload,
-                headers={
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                allow_redirects=False
-            ) as response:
+
+        _LOGGER.warning(
+            "CSRF token length: %s",
+            len(csrf)
+        )
+
+
+        # Send login form
+        async with self.session.post(
+            LOGIN_URL,
+            data=payload,
+            headers={
+                "Content-Type":
+                "application/x-www-form-urlencoded"
+            },
+            allow_redirects=False
+        ) as response:
 
 
             _LOGGER.warning(
@@ -129,8 +141,15 @@ class NaturelaAPI:
 
                 text = await response.text()
 
+
+                _LOGGER.warning(
+                    "Login failed body: %s",
+                    text
+                )
+
+
                 raise Exception(
-                    f"Login failed: {text}"
+                    "Naturela login failed"
                 )
 
 
@@ -161,8 +180,8 @@ class NaturelaAPI:
         )
 
 
-        _LOGGER.debug(
-            "Getting boiler status: %s",
+        _LOGGER.info(
+            "Requesting boiler data: %s",
             url
         )
 
@@ -172,25 +191,27 @@ class NaturelaAPI:
         ) as response:
 
 
-            content_type = response.headers.get(
-                "Content-Type"
-            )
-
-
             text = await response.text()
 
 
             _LOGGER.warning(
-                "Naturela response type: %s",
-                content_type
+                "Naturela status HTTP: %s",
+                response.status
             )
 
 
             _LOGGER.warning(
-                "Naturela response body: %s",
-                text
+                "Naturela content type: %s",
+                response.headers.get(
+                    "Content-Type"
+                )
             )
 
+
+            _LOGGER.debug(
+                "Naturela raw response: %s",
+                text
+            )
 
 
             if response.status == 401:
@@ -203,6 +224,13 @@ class NaturelaAPI:
 
 
 
+            if not text:
+
+                raise Exception(
+                    "Naturela returned empty response"
+                )
+
+
             try:
 
                 return json.loads(
@@ -210,8 +238,7 @@ class NaturelaAPI:
                 )
 
 
-            except Exception:
-
+            except json.JSONDecodeError:
 
                 raise Exception(
                     "Naturela returned invalid JSON:\n"
@@ -226,7 +253,6 @@ class NaturelaAPI:
         temperature=None,
         heater=None
     ):
-
 
         await self.ensure_login()
 
@@ -255,23 +281,26 @@ class NaturelaAPI:
 
 
 
-        _LOGGER.debug(
+        _LOGGER.info(
             "Sending command: %s",
             payload
         )
 
 
-
         async with self.session.post(
             COMMAND_URL,
-            json=payload
+            json=payload,
+            headers={
+                "Content-Type":
+                "application/json"
+            }
         ) as response:
 
 
             text = await response.text()
 
 
-            _LOGGER.debug(
+            _LOGGER.info(
                 "Command response: %s",
                 text
             )

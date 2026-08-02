@@ -8,8 +8,12 @@ STATUS_URL = (
     f"{BASE_URL}/api/smartboiler/{{device_id}}"
 )
 
-COMMAND_URL = (
-    f"{BASE_URL}/api/burnertouch/setState"
+SET_STATE_URL = (
+    f"{BASE_URL}/api/smartboiler/setState"
+)
+
+SET_TEMPERATURE_URL = (
+    f"{BASE_URL}/api/smartboiler/setTemperature"
 )
 
 DEFAULT_SCAN_INTERVAL = 30

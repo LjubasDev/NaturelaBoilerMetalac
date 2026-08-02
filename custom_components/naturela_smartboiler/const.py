@@ -5,7 +5,7 @@ BASE_URL = "https://iot.naturela-bg.com"
 LOGIN_URL = f"{BASE_URL}/Account/Login"
 
 STATUS_URL = (
-    f"{BASE_URL}/api/burnertouch/{{device_id}}"
+    f"{BASE_URL}/api/smartboiler/{{device_id}}"
 )
 
 COMMAND_URL = (

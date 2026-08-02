@@ -2,11 +2,8 @@ import logging
 import json
 from datetime import timedelta
 
-from homeassistant.helpers.update_coordinator import (
-    DataUpdateCoordinator,
-)
-
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import DEFAULT_SCAN_INTERVAL
 
@@ -21,12 +18,11 @@ class NaturelaCoordinator(DataUpdateCoordinator):
         hass: HomeAssistant,
         api,
     ):
-
         self.api = api
 
         super().__init__(
             hass,
-            logger=_LOGGER,
+            _LOGGER,
             name="Naturela Smart Boiler",
             update_interval=timedelta(
                 seconds=DEFAULT_SCAN_INTERVAL
@@ -36,27 +32,20 @@ class NaturelaCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self):
 
-        try:
-            result = await self.api.get_status()
+        _LOGGER.warning(
+            "Naturela update method running"
+        )
 
-            _LOGGER.debug(
-                "Naturela raw response: %s",
-                result
+        response = await self.api.get_status()
+
+        _LOGGER.debug(
+            "Naturela response: %s",
+            response
+        )
+
+        if "objectJson" in response:
+            return json.loads(
+                response["objectJson"]
             )
 
-            if "objectJson" in result:
-                return json.loads(
-                    result["objectJson"]
-                )
-
-            return result
-
-
-        except Exception as err:
-
-            _LOGGER.error(
-                "Failed to update Naturela data: %s",
-                err
-            )
-
-            raise
+        return response

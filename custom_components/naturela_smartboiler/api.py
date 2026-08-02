@@ -19,9 +19,8 @@ HEADERS = {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 Chrome/150 Safari/537.36"
     ),
-    "Accept": (
-        "application/json, text/plain, */*"
-    ),
+    "Accept": "*/*",
+    "Content-Type": "application/json",
     "X-Requested-With": "XMLHttpRequest",
     "Referer": "https://iot.naturela-bg.com/",
 }

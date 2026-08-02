@@ -32,3 +32,7 @@ SET_HEATER_URL = (
     BASE_URL +
     "/api/smartboiler/setHeater"
 )
+
+
+# Home Assistant update interval
+DEFAULT_SCAN_INTERVAL = 30

@@ -187,7 +187,12 @@ class NaturelaAPI:
 
 
         async with self.session.get(
-            url
+            url,
+            headers={
+                "Accept": "*/*",
+                "Content-Type": "application/json",
+                "Referer": "https://iot.naturela-bg.com/",
+            }
         ) as response:
 
 
@@ -208,7 +213,7 @@ class NaturelaAPI:
             )
 
 
-            _LOGGER.debug(
+            _LOGGER.warning(
                 "Naturela raw response: %s",
                 text
             )

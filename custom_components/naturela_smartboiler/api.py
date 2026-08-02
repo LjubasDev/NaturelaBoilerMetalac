@@ -252,63 +252,70 @@ class NaturelaAPI:
 
 
 
-    async def set_state(
-        self,
-        state=None,
-        temperature=None,
-        heater=None
-    ):
-
-        await self.ensure_login()
-
-
-        payload = {
-
-            "deviceId":
-            self.device_id
-
-        }
-
-
-        if state is not None:
-
-            payload["state"] = state
-
-
-        if temperature is not None:
-
-            payload["temperature"] = temperature
-
-
-        if heater is not None:
-
-            payload["heater"] = heater
-
-
-
-        _LOGGER.info(
-            "Sending command: %s",
-            payload
-        )
-
-
-        async with self.session.post(
-            COMMAND_URL,
-            json=payload,
-            headers={
-                "Content-Type":
-                "application/json"
-            }
-        ) as response:
-
-
-            text = await response.text()
-
-
-            _LOGGER.info(
-                "Command response: %s",
-                text
-            )
-
-
-            return text
+            async def set_state(
+                self,
+                state=None,
+                temperature=None,
+                heater=None
+            ):
+            
+                await self.ensure_login()
+            
+            
+                if temperature is not None:
+            
+                    url = SET_TEMPERATURE_URL
+            
+                    payload = {
+                        "deviceId": self.device_id,
+                        "temperature": temperature
+                    }
+            
+            
+                else:
+            
+                    url = SET_STATE_URL
+            
+                    payload = {
+                        "deviceId": self.device_id
+                    }
+            
+            
+                    if state is not None:
+                        payload["state"] = state
+            
+            
+                    if heater is not None:
+                        payload["heater"] = heater
+            
+            
+            
+                _LOGGER.warning(
+                    "Sending SmartBoiler command: %s %s",
+                    url,
+                    payload
+                )
+            
+            
+                async with self.session.post(
+                    url,
+                    json=payload,
+                    headers={
+                        "Accept": "*/*",
+                        "Content-Type": "application/json",
+                        "Referer": "https://iot.naturela-bg.com/",
+                    }
+                ) as response:
+            
+            
+                    text = await response.text()
+            
+            
+                    _LOGGER.warning(
+                        "Command HTTP %s response: %s",
+                        response.status,
+                        text
+                    )
+            
+            
+                    return text

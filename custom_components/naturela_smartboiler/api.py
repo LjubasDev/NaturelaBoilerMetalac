@@ -7,7 +7,9 @@ from bs4 import BeautifulSoup
 from .const import (
     LOGIN_URL,
     STATUS_URL,
-    COMMAND_URL,
+    SET_TEMPERATURE_URL,
+    SET_STATE_URL,
+    SET_HEATER_URL,
 )
 
 
@@ -264,47 +266,49 @@ class NaturelaAPI:
             
                 if temperature is not None:
             
-                    url = SET_TEMPERATURE_URL
-            
                     payload = {
                         "deviceId": self.device_id,
                         "temperature": temperature
                     }
             
+                    url = SET_TEMPERATURE_URL
             
-                else:
+            
+                elif state is not None:
+            
+                    payload = {
+                        "deviceId": self.device_id,
+                        "state": state
+                    }
             
                     url = SET_STATE_URL
             
+            
+                elif heater is not None:
+            
                     payload = {
-                        "deviceId": self.device_id
+                        "deviceId": self.device_id,
+                        "heater": heater
                     }
             
-            
-                    if state is not None:
-                        payload["state"] = state
+                    url = SET_HEATER_URL
             
             
-                    if heater is not None:
-                        payload["heater"] = heater
+                else:
+            
+                    return
             
             
             
                 _LOGGER.warning(
-                    "Sending SmartBoiler command: %s %s",
-                    url,
+                    "Sending SmartBoiler command: %s",
                     payload
                 )
             
             
                 async with self.session.post(
                     url,
-                    json=payload,
-                    headers={
-                        "Accept": "*/*",
-                        "Content-Type": "application/json",
-                        "Referer": "https://iot.naturela-bg.com/",
-                    }
+                    json=payload
                 ) as response:
             
             
@@ -312,7 +316,7 @@ class NaturelaAPI:
             
             
                     _LOGGER.warning(
-                        "Command HTTP %s response: %s",
+                        "SmartBoiler command response %s: %s",
                         response.status,
                         text
                     )

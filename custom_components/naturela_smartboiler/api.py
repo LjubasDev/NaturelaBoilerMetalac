@@ -60,7 +60,8 @@ class NaturelaAPI:
         )
 
 
-        # Get login page and extract CSRF token
+        # Get login page and CSRF token
+
         async with self.session.get(
             LOGIN_URL
         ) as response:
@@ -68,30 +69,29 @@ class NaturelaAPI:
             html = await response.text()
 
 
-        soup = BeautifulSoup(
-            html,
-            "html.parser"
-        )
-
-
-        token = soup.find(
-            "input",
-            {
-                "name": "__RequestVerificationToken"
-            }
-        )
-
-
-        if not token:
-
-            raise Exception(
-                "Naturela CSRF token not found"
+            soup = BeautifulSoup(
+                html,
+                "html.parser"
             )
 
 
-        csrf = token.get(
-            "value"
-        )
+            token = soup.find(
+                "input",
+                {
+                    "name": "__RequestVerificationToken"
+                }
+            )
+
+
+            if not token:
+
+                raise Exception(
+                    "Naturela CSRF token not found"
+                )
+
+
+            csrf = token.get("value")
+
 
 
         payload = {
@@ -106,6 +106,7 @@ class NaturelaAPI:
         }
 
 
+
         _LOGGER.warning(
             "Trying login with email: %s",
             self.email
@@ -118,7 +119,7 @@ class NaturelaAPI:
         )
 
 
-        # Send login form
+
         async with self.session.post(
             LOGIN_URL,
             data=payload,
@@ -143,12 +144,10 @@ class NaturelaAPI:
 
                 text = await response.text()
 
-
-                _LOGGER.warning(
+                _LOGGER.error(
                     "Login failed body: %s",
                     text
                 )
-
 
                 raise Exception(
                     "Naturela login failed"
@@ -182,41 +181,28 @@ class NaturelaAPI:
         )
 
 
-        _LOGGER.info(
-            "Requesting boiler data: %s",
+        _LOGGER.debug(
+            "Getting SmartBoiler status: %s",
             url
         )
 
 
         async with self.session.get(
-            url,
-            headers={
-                "Accept": "*/*",
-                "Content-Type": "application/json",
-                "Referer": "https://iot.naturela-bg.com/",
-            }
+            url
         ) as response:
 
 
             text = await response.text()
 
 
-            _LOGGER.warning(
-                "Naturela status HTTP: %s",
+            _LOGGER.debug(
+                "Status HTTP: %s",
                 response.status
             )
 
 
-            _LOGGER.warning(
-                "Naturela content type: %s",
-                response.headers.get(
-                    "Content-Type"
-                )
-            )
-
-
-            _LOGGER.warning(
-                "Naturela raw response: %s",
+            _LOGGER.debug(
+                "Status response: %s",
                 text
             )
 
@@ -231,7 +217,7 @@ class NaturelaAPI:
 
 
 
-            if not text:
+            if not text.strip():
 
                 raise Exception(
                     "Naturela returned empty response"
@@ -254,72 +240,132 @@ class NaturelaAPI:
 
 
 
-            async def set_state(
-                self,
-                state=None,
-                temperature=None,
-                heater=None
-            ):
-            
-                await self.ensure_login()
-            
-            
-                if temperature is not None:
-            
-                    payload = {
-                        "deviceId": self.device_id,
-                        "temperature": temperature
-                    }
-            
-                    url = SET_TEMPERATURE_URL
-            
-            
-                elif state is not None:
-            
-                    payload = {
-                        "deviceId": self.device_id,
-                        "state": state
-                    }
-            
-                    url = SET_STATE_URL
-            
-            
-                elif heater is not None:
-            
-                    payload = {
-                        "deviceId": self.device_id,
-                        "heater": heater
-                    }
-            
-                    url = SET_HEATER_URL
-            
-            
-                else:
-            
-                    return
-            
-            
-            
-                _LOGGER.warning(
-                    "Sending SmartBoiler command: %s",
-                    payload
-                )
-            
-            
-                async with self.session.post(
-                    url,
-                    json=payload
-                ) as response:
-            
-            
-                    text = await response.text()
-            
-            
-                    _LOGGER.warning(
-                        "SmartBoiler command response %s: %s",
-                        response.status,
-                        text
-                    )
-            
-            
-                    return text
+    async def set_temperature(
+        self,
+        temperature
+    ):
+
+        await self.ensure_login()
+
+
+        payload = {
+
+            "deviceId":
+            self.device_id,
+
+            "temperature":
+            temperature
+        }
+
+
+        _LOGGER.warning(
+            "Setting temperature: %s",
+            payload
+        )
+
+
+        async with self.session.post(
+            SET_TEMPERATURE_URL,
+            json=payload
+        ) as response:
+
+
+            text = await response.text()
+
+
+            _LOGGER.warning(
+                "Temperature response %s: %s",
+                response.status,
+                text
+            )
+
+
+            return text
+
+
+
+    async def set_state(
+        self,
+        state
+    ):
+
+        await self.ensure_login()
+
+
+        payload = {
+
+            "deviceId":
+            self.device_id,
+
+            "state":
+            state
+        }
+
+
+        _LOGGER.warning(
+            "Setting state: %s",
+            payload
+        )
+
+
+        async with self.session.post(
+            SET_STATE_URL,
+            json=payload
+        ) as response:
+
+
+            text = await response.text()
+
+
+            _LOGGER.warning(
+                "State response %s: %s",
+                response.status,
+                text
+            )
+
+
+            return text
+
+
+
+    async def set_heater(
+        self,
+        heater
+    ):
+
+        await self.ensure_login()
+
+
+        payload = {
+
+            "deviceId":
+            self.device_id,
+
+            "heater":
+            heater
+        }
+
+
+        _LOGGER.warning(
+            "Setting boost heater: %s",
+            payload
+        )
+
+
+        async with self.session.post(
+            SET_HEATER_URL,
+            json=payload
+        ) as response:
+
+
+            text = await response.text()
+
+
+            _LOGGER.warning(
+                "Heater response %s: %s",
+                response.status,
+                text
+            )
+
+
+            return text

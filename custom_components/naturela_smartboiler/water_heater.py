@@ -95,7 +95,6 @@ class NaturelaWaterHeater(
 
     @property
     def current_operation(self):
-
         states = {
             0: "Off",
             1: "Heating",

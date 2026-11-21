@@ -33,6 +33,8 @@ class NaturelaWaterHeater(
 
     _attr_has_entity_name = True
 
+    _attr_target_temperature_step = 1
+
     _attr_supported_features = (
         WaterHeaterEntityFeature.TARGET_TEMPERATURE
     )

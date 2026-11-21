@@ -8,6 +8,7 @@ from .const import (
     LOGIN_URL,
     STATUS_URL,
     SET_STATE_URL,
+    SET_HEATER_URL,
     SET_TEMPERATURE_URL,
 )
 
@@ -36,6 +37,7 @@ class NaturelaAPI:
         self.email = email
         self.password = password
         self.device_id = device_id
+        self.command_device_id = None
 
         self.session = aiohttp.ClientSession(
             headers=HEADERS
@@ -172,7 +174,23 @@ class NaturelaAPI:
 
             try:
 
-                return json.loads(text)
+                data = json.loads(text)
+                device_data = data
+
+                if isinstance(data, dict) and isinstance(
+                    data.get("objectJson"), str
+                ):
+                    try:
+                        device_data = json.loads(data["objectJson"])
+                    except json.JSONDecodeError:
+                        device_data = data
+
+                if isinstance(device_data, dict):
+                    command_device_id = device_data.get("DeviceID")
+                    if command_device_id is not None:
+                        self.command_device_id = str(command_device_id)
+
+                return data
 
             except Exception:
 
@@ -191,7 +209,7 @@ class NaturelaAPI:
 
 
         payload = {
-            "deviceId": self.device_id,
+            "deviceId": self.command_device_id or self.device_id,
             "state": state
         }
 
@@ -211,11 +229,49 @@ class NaturelaAPI:
             result = await response.text()
 
 
-            _LOGGER.info(
-                "Set state response: %s",
-                result
+            _LOGGER.warning(
+                "Naturela setState HTTP %s: %s",
+                response.status,
+                result[:300]
             )
 
+            response.raise_for_status()
+
+
+            return result
+
+
+    async def set_heater(
+        self,
+        heater
+    ):
+
+        await self.ensure_login()
+
+        payload = {
+            "deviceId": self.command_device_id or self.device_id,
+            "heater": 1 if heater else 0
+        }
+
+        _LOGGER.info(
+            "Setting boiler heater: %s",
+            payload
+        )
+
+        async with self.session.post(
+            SET_HEATER_URL,
+            json=payload
+        ) as response:
+
+            result = await response.text()
+
+            _LOGGER.warning(
+                "Naturela setHeater HTTP %s: %s",
+                response.status,
+                result[:300]
+            )
+
+            response.raise_for_status()
 
             return result
 
@@ -230,7 +286,7 @@ class NaturelaAPI:
 
 
         payload = {
-            "deviceId": self.device_id,
+            "deviceId": self.command_device_id or self.device_id,
             "temperature": temperature
         }
 
@@ -250,10 +306,13 @@ class NaturelaAPI:
             result = await response.text()
 
 
-            _LOGGER.info(
-                "Set temperature response: %s",
-                result
+            _LOGGER.warning(
+                "Naturela setTemperature HTTP %s: %s",
+                response.status,
+                result[:300]
             )
+
+            response.raise_for_status()
 
 
             return result

@@ -1,4 +1,9 @@
 # Naturela Smart Boiler for Home Assistant
+
+<p align="center">
+  <img src="custom_components/naturela_smartboiler/brand/logo.png" alt="Naturela Smart Boiler" width="520">
+</p>
+
 An unofficial Home Assistant custom integration for cloud-connected Naturela Smart Boiler units, including Metalac models. It connects through a Naturela Smart Home account and lets Home Assistant monitor the boiler and send control commands.
 This community-tested integration has been exercised with a Metalac boiler using an NHC-57 controller and software version 52. Other boiler/controller combinations need user testing.
 ## Features
